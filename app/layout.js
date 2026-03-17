@@ -134,6 +134,7 @@ function Footer() {
             <ul>
               <li><a href="/">Startpagina</a></li>
               <li><a href="/over">Over dit woordenboek</a></li>
+              <li><a href="/contact">Contact</a></li>
             </ul>
           </div>
           <div className="footer-col">
@@ -143,6 +144,14 @@ function Footer() {
               <li><a href="/letter/g">G — L</a></li>
               <li><a href="/letter/m">M — R</a></li>
               <li><a href="/letter/s">S — Z</a></li>
+            </ul>
+          </div>
+          <div className="footer-col">
+            <h4>Juridisch</h4>
+            <ul>
+              <li><a href="/privacy">Privacybeleid</a></li>
+              <li><a href="/terms">Algemene voorwaarden</a></li>
+              <li><a href="/cookies">Cookiebeleid</a></li>
             </ul>
           </div>
           <div className="footer-col">

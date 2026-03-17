@@ -44,7 +44,7 @@ export function CookieConsent() {
         <p className="cookie-text">
           Wij gebruiken cookies voor website-analyse en het tonen van advertenties.
           Lees meer in ons{' '}
-          <a href="/over" style={{ textDecoration: 'underline' }}>privacybeleid</a>.
+          <a href="/cookies" style={{ textDecoration: 'underline' }}>cookiebeleid</a>.
         </p>
         <div className="cookie-actions">
           <button className="cookie-btn cookie-btn--accept" onClick={handleAccept}>
