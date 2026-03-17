@@ -293,7 +293,7 @@
     const found = idx !== -1;
     const displayWord = found ? words[idx] : word;
 
-    // Get dictionary entry
+    // Get dictionary entry (nlwiktionary format)
     const dict = dictData[displayWord.toLowerCase()] || dictData[word.toLowerCase()] || null;
 
     // Get neighboring words for navigation
@@ -301,10 +301,10 @@
     const nextWord = idx < words.length - 1 ? words[idx + 1] : null;
 
     // Find related words — prefer synonyms from dict, fallback to prefix
+    let synonyms = (dict && dict.y) ? dict.y : [];
+    let antonyms = (dict && dict.n) ? dict.n : [];
     let related = [];
-    if (dict && dict.y && dict.y.length > 0) {
-      related = dict.y;
-    } else {
+    if (synonyms.length === 0 && antonyms.length === 0) {
       const prefix = displayWord.toLowerCase().slice(0, Math.min(4, displayWord.length));
       related = words
         .filter(w => w.toLowerCase().startsWith(prefix) && w.toLowerCase() !== displayWord.toLowerCase())
@@ -314,13 +314,14 @@
     // Word properties
     const charCount = displayWord.replace(/\s/g, '').length;
     const hasDef = dict && dict.s && dict.s.length > 0;
+    const firstDef = hasDef ? dict.s[0].d[0]?.t : undefined;
 
     // JSON-LD for the word
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "DefinedTerm",
       "name": displayWord,
-      "description": hasDef ? dict.s[0].def : undefined,
+      "description": firstDef,
       "inDefinedTermSet": {
         "@type": "DefinedTermSet",
         "name": "Nederlands Woordenboek",
@@ -334,31 +335,25 @@
       }
     };
 
-    // Build senses HTML grouped by POS
+    // Gender label
+    const genderMap = { 'n': 'onzijdig (het)', 'm': 'mannelijk (de)', 'v': 'vrouwelijk (de)', 'm,v': 'mannelijk/vrouwelijk (de)', 'p': 'meervoud', 'm,v,n': 'alle geslachten', 'm,n': 'mannelijk/onzijdig', 'v,n': 'vrouwelijk/onzijdig' };
+    const genderLabel = dict && dict.g ? (genderMap[dict.g] || dict.g) : null;
+
+    // Build senses HTML — nlwiktionary format: s = [{p: pos, d: [{t, g?, x?}]}]
     let sensesHtml = '';
     if (hasDef) {
-      const grouped = {};
-      dict.s.forEach(sense => {
-        const pos = sense.pos || 'overig';
-        if (!grouped[pos]) grouped[pos] = [];
-        grouped[pos].push(sense);
-      });
-
-      for (const [pos, senses] of Object.entries(grouped)) {
+      dict.s.forEach(posGroup => {
         sensesHtml += `<div class="dict-pos-group">`;
-        sensesHtml += `<div class="dict-pos-label">${escapeHtml(pos)}</div>`;
+        sensesHtml += `<div class="dict-pos-label">${escapeHtml(posGroup.p)}</div>`;
         sensesHtml += `<ol class="dict-senses">`;
-        senses.forEach(s => {
+        posGroup.d.forEach(d => {
           let html = `<li class="dict-sense">`;
-          // Tags
-          if (s.tags && s.tags.length) {
-            html += `<span class="dict-tags">${s.tags.map(t => escapeHtml(t)).join(', ')}</span> `;
+          if (d.g && d.g.length) {
+            html += `<span class="dict-tags">${d.g.map(t => escapeHtml(t)).join(', ')}</span> `;
           }
-          // Definition
-          html += `<span class="dict-def">${escapeHtml(s.def)}</span>`;
-          // Examples
-          if (s.examples && s.examples.length) {
-            s.examples.forEach(ex => {
+          html += `<span class="dict-def">${escapeHtml(d.t)}</span>`;
+          if (d.x && d.x.length) {
+            d.x.forEach(ex => {
               html += `<div class="dict-example">${escapeHtml(ex)}</div>`;
             });
           }
@@ -366,13 +361,16 @@
           sensesHtml += html;
         });
         sensesHtml += `</ol></div>`;
-      }
+      });
     }
 
     // Pronunciation section
     let pronHtml = '';
-    if (dict && (dict.i || dict.a)) {
+    if (dict && (dict.i || dict.a || genderLabel)) {
       pronHtml = `<div class="dict-pronunciation">`;
+      if (genderLabel) {
+        pronHtml += `<span class="dict-gender">${escapeHtml(genderLabel)}</span>`;
+      }
       if (dict.i) {
         pronHtml += `<span class="dict-ipa">${escapeHtml(dict.i)}</span>`;
       }
@@ -385,18 +383,6 @@
       pronHtml += `</div>`;
     }
 
-    // Forms section
-    let formsHtml = '';
-    if (dict && dict.f && dict.f.length > 0) {
-      formsHtml = `<div class="dict-forms">`;
-      formsHtml += `<h3 class="dict-section-title">Woordvormen</h3>`;
-      formsHtml += `<div class="dict-forms-list">`;
-      dict.f.slice(0, 8).forEach(f => {
-        formsHtml += `<span class="dict-form-tag">${escapeHtml(f)}</span>`;
-      });
-      formsHtml += `</div></div>`;
-    }
-
     // Etymology section
     let etymHtml = '';
     if (dict && dict.e) {
@@ -404,6 +390,45 @@
       etymHtml += `<h3 class="dict-section-title">Etymologie</h3>`;
       etymHtml += `<p class="dict-etym-text">${escapeHtml(dict.e)}</p>`;
       etymHtml += `</div>`;
+    }
+
+    // Expressions / proverbs section
+    let exprHtml = '';
+    if (dict && dict.x && dict.x.length > 0) {
+      exprHtml = `<div class="dict-expressions">`;
+      exprHtml += `<h3 class="dict-section-title">Uitdrukkingen</h3>`;
+      exprHtml += `<ul class="dict-expr-list">`;
+      dict.x.forEach(ex => {
+        exprHtml += `<li class="dict-expr-item">`;
+        exprHtml += `<span class="dict-expr-text">${escapeHtml(ex.e)}</span>`;
+        if (ex.m) {
+          exprHtml += ` <span class="dict-expr-meaning">— ${escapeHtml(ex.m)}</span>`;
+        }
+        exprHtml += `</li>`;
+      });
+      exprHtml += `</ul></div>`;
+    }
+
+    // Translations section
+    let transHtml = '';
+    if (dict && dict.tr && Object.keys(dict.tr).length > 0) {
+      const langNames = {
+        en: 'Engels', fr: 'Frans', de: 'Duits', es: 'Spaans', it: 'Italiaans',
+        pt: 'Portugees', ru: 'Russisch', zh: 'Chinees', ja: 'Japans',
+        ko: 'Koreaans', ar: 'Arabisch', tr: 'Turks', pl: 'Pools',
+        sv: 'Zweeds', da: 'Deens'
+      };
+      transHtml = `<div class="dict-translations">`;
+      transHtml += `<h3 class="dict-section-title">Vertalingen</h3>`;
+      transHtml += `<div class="dict-trans-grid">`;
+      for (const [lang, words] of Object.entries(dict.tr)) {
+        const name = langNames[lang] || lang;
+        transHtml += `<div class="dict-trans-item">`;
+        transHtml += `<span class="dict-trans-lang">${escapeHtml(name)}</span>`;
+        transHtml += `<span class="dict-trans-word">${words.map(w => escapeHtml(w)).join(', ')}</span>`;
+        transHtml += `</div>`;
+      }
+      transHtml += `</div></div>`;
     }
 
     app.innerHTML = `
@@ -445,19 +470,37 @@
           </div>
         </div>`}
 
-        ${formsHtml}
         ${etymHtml}
+
+        ${synonyms.length > 0 ? `
+        <section class="related-section">
+          <h2 class="related-title">Synoniemen</h2>
+          <div class="related-words">
+            ${synonyms.map(w => `<a href="#/woord/${encodeURIComponent(w)}" class="related-tag">${escapeHtml(w)}</a>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${antonyms.length > 0 ? `
+        <section class="related-section">
+          <h2 class="related-title">Antoniemen</h2>
+          <div class="related-words">
+            ${antonyms.map(w => `<a href="#/woord/${encodeURIComponent(w)}" class="related-tag related-tag--ant">${escapeHtml(w)}</a>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${exprHtml}
+        ${transHtml}
 
         ${related.length > 0 ? `
         <section class="related-section">
-          <h2 class="related-title">${dict && dict.y && dict.y.length > 0 ? 'Synoniemen' : 'Verwante woorden'}</h2>
+          <h2 class="related-title">Verwante woorden</h2>
           <div class="related-words">
             ${related.map(w => `<a href="#/woord/${encodeURIComponent(w)}" class="related-tag">${escapeHtml(w)}</a>`).join('')}
           </div>
         </section>` : ''}
 
         <div class="dict-source-note">
-          Bron: <a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer">OpenTaal</a>${hasDef ? ' &amp; <a href="https://en.wiktionary.org/" target="_blank" rel="noopener noreferrer">Wiktionary</a>' : ''}
+          Bron: <a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer">OpenTaal</a>${hasDef ? ' &amp; <a href="https://nl.wiktionary.org/" target="_blank" rel="noopener noreferrer">WikiWoordenboek</a>' : ''}
         </div>
 
         <nav class="word-nav">
