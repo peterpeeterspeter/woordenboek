@@ -9,7 +9,9 @@
   // --- State ---
   const state = {
     wordCache: {},     // letter -> word array
+    dictCache: {},     // letter -> dict data {word: {s,i,a,e,y,f}}
     loadingLetters: {}, // letter -> Promise
+    loadingDicts: {},   // letter -> Promise
     currentPage: 1,
     wordsPerPage: 500,
     totalWords: 408825,
@@ -79,6 +81,30 @@
     } catch(e) {
       console.warn('Could not load index');
     }
+  }
+
+  // Load enriched dictionary data for a letter
+  async function loadDictData(letter) {
+    const key = letter.toUpperCase();
+    if (state.dictCache[key]) return state.dictCache[key];
+    if (state.loadingDicts[key]) return state.loadingDicts[key];
+
+    state.loadingDicts[key] = fetch(`./data/${letter.toLowerCase()}_dict.json`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to load dict');
+        return r.json();
+      })
+      .then(data => {
+        state.dictCache[key] = data;
+        delete state.loadingDicts[key];
+        return data;
+      })
+      .catch(() => {
+        delete state.loadingDicts[key];
+        return {};
+      });
+
+    return state.loadingDicts[key];
   }
 
   // --- Router ---
@@ -255,34 +281,46 @@
   async function renderWord(word) {
     const firstChar = word[0]?.toUpperCase();
     const letterKey = LETTERS.includes(firstChar) ? firstChar : 'A';
-    const words = await loadLetterData(letterKey);
+
+    // Load both word list and dictionary data in parallel
+    const [words, dictData] = await Promise.all([
+      loadLetterData(letterKey),
+      loadDictData(letterKey)
+    ]);
 
     // Find exact match (case-insensitive)
     const idx = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
     const found = idx !== -1;
     const displayWord = found ? words[idx] : word;
 
+    // Get dictionary entry
+    const dict = dictData[displayWord.toLowerCase()] || dictData[word.toLowerCase()] || null;
+
     // Get neighboring words for navigation
     const prevWord = idx > 0 ? words[idx - 1] : null;
     const nextWord = idx < words.length - 1 ? words[idx + 1] : null;
 
-    // Find related words (same prefix)
-    const prefix = displayWord.toLowerCase().slice(0, Math.min(4, displayWord.length));
-    const related = words
-      .filter(w => w.toLowerCase().startsWith(prefix) && w.toLowerCase() !== displayWord.toLowerCase())
-      .slice(0, 15);
+    // Find related words — prefer synonyms from dict, fallback to prefix
+    let related = [];
+    if (dict && dict.y && dict.y.length > 0) {
+      related = dict.y;
+    } else {
+      const prefix = displayWord.toLowerCase().slice(0, Math.min(4, displayWord.length));
+      related = words
+        .filter(w => w.toLowerCase().startsWith(prefix) && w.toLowerCase() !== displayWord.toLowerCase())
+        .slice(0, 12);
+    }
 
     // Word properties
     const charCount = displayWord.replace(/\s/g, '').length;
-    const syllableEstimate = estimateSyllables(displayWord);
-    const hasHyphen = displayWord.includes('-');
-    const hasSpace = displayWord.includes(' ');
+    const hasDef = dict && dict.s && dict.s.length > 0;
 
     // JSON-LD for the word
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "DefinedTerm",
       "name": displayWord,
+      "description": hasDef ? dict.s[0].def : undefined,
       "inDefinedTermSet": {
         "@type": "DefinedTermSet",
         "name": "Nederlands Woordenboek",
@@ -295,6 +333,78 @@
         "url": "https://www.perplexity.ai/computer"
       }
     };
+
+    // Build senses HTML grouped by POS
+    let sensesHtml = '';
+    if (hasDef) {
+      const grouped = {};
+      dict.s.forEach(sense => {
+        const pos = sense.pos || 'overig';
+        if (!grouped[pos]) grouped[pos] = [];
+        grouped[pos].push(sense);
+      });
+
+      for (const [pos, senses] of Object.entries(grouped)) {
+        sensesHtml += `<div class="dict-pos-group">`;
+        sensesHtml += `<div class="dict-pos-label">${escapeHtml(pos)}</div>`;
+        sensesHtml += `<ol class="dict-senses">`;
+        senses.forEach(s => {
+          let html = `<li class="dict-sense">`;
+          // Tags
+          if (s.tags && s.tags.length) {
+            html += `<span class="dict-tags">${s.tags.map(t => escapeHtml(t)).join(', ')}</span> `;
+          }
+          // Definition
+          html += `<span class="dict-def">${escapeHtml(s.def)}</span>`;
+          // Examples
+          if (s.examples && s.examples.length) {
+            s.examples.forEach(ex => {
+              html += `<div class="dict-example">${escapeHtml(ex)}</div>`;
+            });
+          }
+          html += `</li>`;
+          sensesHtml += html;
+        });
+        sensesHtml += `</ol></div>`;
+      }
+    }
+
+    // Pronunciation section
+    let pronHtml = '';
+    if (dict && (dict.i || dict.a)) {
+      pronHtml = `<div class="dict-pronunciation">`;
+      if (dict.i) {
+        pronHtml += `<span class="dict-ipa">${escapeHtml(dict.i)}</span>`;
+      }
+      if (dict.a) {
+        pronHtml += `<button class="dict-audio-btn" onclick="playAudio('${escapeHtml(dict.a)}')" aria-label="Luister naar uitspraak">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          Luister
+        </button>`;
+      }
+      pronHtml += `</div>`;
+    }
+
+    // Forms section
+    let formsHtml = '';
+    if (dict && dict.f && dict.f.length > 0) {
+      formsHtml = `<div class="dict-forms">`;
+      formsHtml += `<h3 class="dict-section-title">Woordvormen</h3>`;
+      formsHtml += `<div class="dict-forms-list">`;
+      dict.f.slice(0, 8).forEach(f => {
+        formsHtml += `<span class="dict-form-tag">${escapeHtml(f)}</span>`;
+      });
+      formsHtml += `</div></div>`;
+    }
+
+    // Etymology section
+    let etymHtml = '';
+    if (dict && dict.e) {
+      etymHtml = `<div class="dict-etymology">`;
+      etymHtml += `<h3 class="dict-section-title">Etymologie</h3>`;
+      etymHtml += `<p class="dict-etym-text">${escapeHtml(dict.e)}</p>`;
+      etymHtml += `</div>`;
+    }
 
     app.innerHTML = `
       <div class="page-content word-page">
@@ -313,24 +423,18 @@
         </div>` : ''}
 
         <h1 class="word-heading">${escapeHtml(displayWord)}</h1>
+        ${pronHtml}
 
+        ${hasDef ? `
+        <div class="dict-card">
+          <h2 class="dict-card-title">Betekenis</h2>
+          ${sensesHtml}
+        </div>` : `
         <div class="word-info-card">
           <div class="word-info-row">
             <span class="word-info-label">Letters</span>
             <span class="word-info-value">${charCount}</span>
           </div>
-          <div class="word-info-row">
-            <span class="word-info-label">Lettergrepen</span>
-            <span class="word-info-value">±${syllableEstimate}</span>
-          </div>
-          ${hasHyphen ? `<div class="word-info-row">
-            <span class="word-info-label">Type</span>
-            <span class="word-info-value">Samengesteld woord (met koppelteken)</span>
-          </div>` : ''}
-          ${hasSpace ? `<div class="word-info-row">
-            <span class="word-info-label">Type</span>
-            <span class="word-info-value">Meerdere woorden</span>
-          </div>` : ''}
           <div class="word-info-row">
             <span class="word-info-label">Begint met</span>
             <span class="word-info-value"><a href="#/letter/${letterKey.toLowerCase()}" style="color:var(--color-primary);text-decoration:none">${letterKey}</a></span>
@@ -339,15 +443,22 @@
             <span class="word-info-label">Bron</span>
             <span class="word-info-value"><a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:none">OpenTaal</a></span>
           </div>
-        </div>
+        </div>`}
+
+        ${formsHtml}
+        ${etymHtml}
 
         ${related.length > 0 ? `
         <section class="related-section">
-          <h2 class="related-title">Verwante woorden</h2>
+          <h2 class="related-title">${dict && dict.y && dict.y.length > 0 ? 'Synoniemen' : 'Verwante woorden'}</h2>
           <div class="related-words">
             ${related.map(w => `<a href="#/woord/${encodeURIComponent(w)}" class="related-tag">${escapeHtml(w)}</a>`).join('')}
           </div>
         </section>` : ''}
+
+        <div class="dict-source-note">
+          Bron: <a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer">OpenTaal</a>${hasDef ? ' &amp; <a href="https://en.wiktionary.org/" target="_blank" rel="noopener noreferrer">Wiktionary</a>' : ''}
+        </div>
 
         <nav class="word-nav">
           ${prevWord ? `<a href="#/woord/${encodeURIComponent(prevWord)}">← ${escapeHtml(prevWord)}</a>` : '<span></span>'}
@@ -356,6 +467,12 @@
       </div>
     `;
   }
+
+  // Audio playback
+  window.playAudio = function(url) {
+    const audio = new Audio(url);
+    audio.play().catch(() => console.warn('Audio playback failed'));
+  };
 
   // --- Render: Search results ---
   async function renderSearch(query) {
