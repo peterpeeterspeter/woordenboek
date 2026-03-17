@@ -1,5 +1,8 @@
 import './base.css';
 import './style.css';
+import { GoogleAnalytics } from '../components/Analytics';
+import { AdSenseScript } from '../components/AdSense';
+import { CookieConsent } from '../components/CookieConsent';
 
 export const metadata = {
   metadataBase: new URL('https://woordenboek.org'),
@@ -18,6 +21,10 @@ export const metadata = {
   other: {
     generator: 'Perplexity Computer',
     author: 'Perplexity Computer',
+    'google-adsense-account': 'ca-pub-4890613119082560',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>",
@@ -77,6 +84,9 @@ export default function RootLayout({ children }) {
         </main>
         <Footer />
         <ThemeScript />
+        <GoogleAnalytics />
+        <AdSenseScript />
+        <CookieConsent />
       </body>
     </html>
   );
