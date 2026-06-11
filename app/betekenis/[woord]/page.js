@@ -168,6 +168,11 @@ export default function WordPage({ params }) {
               </Link>
             ))}
           </div>
+          <div style={{ marginTop: 'var(--space-3)' }}>
+            <Link href={`/synoniem/${encodeURIComponent(displayWord)}`} className="syn-nav-link">
+              Bekijk alle synoniemen →
+            </Link>
+          </div>
         </section>
       )}
 
@@ -235,6 +240,13 @@ export default function WordPage({ params }) {
         {hasDef && (
           <> &amp; <a href="https://nl.wiktionary.org/" target="_blank" rel="noopener noreferrer">WikiWoordenboek</a></>
         )}
+      </div>
+
+      {/* Cross-links to related pages */}
+      <div className="syn-nav-links">
+        <Link href={`/synoniem/${encodeURIComponent(displayWord)}`} className="syn-nav-link">
+          📖 Synoniemen van {displayWord}
+        </Link>
       </div>
 
       {/* Prev/next navigation */}

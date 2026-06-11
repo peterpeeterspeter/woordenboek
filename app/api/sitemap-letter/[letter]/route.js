@@ -1,4 +1,4 @@
-import { getDefinedWordsForLetter, LETTERS } from '../../../../lib/dictionary';
+import { getDefinedWordsForLetter, getDictData, LETTERS } from '../../../../lib/dictionary';
 
 export async function GET(request, { params }) {
   const l = params.letter?.toLowerCase();
@@ -7,18 +7,37 @@ export async function GET(request, { params }) {
   }
 
   const words = getDefinedWordsForLetter(l);
+  const dictData = getDictData(l);
   const base = 'https://woordenboek.org';
   const today = new Date().toISOString().split('T')[0];
 
   const urls = words
-    .map(
-      (w) => `  <url>
+    .flatMap((w) => {
+      const entry = dictData[w.toLowerCase()] || dictData[w];
+      const pages = [
+        // Always include betekenis page
+        `  <url>
     <loc>${base}/betekenis/${encodeURIComponent(w)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>`,
+      ];
+
+      // Add synoniem page if word has synonyms
+      if (entry?.y?.length > 0) {
+        pages.push(
+          `  <url>
+    <loc>${base}/synoniem/${encodeURIComponent(w)}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>`
-    )
+        );
+      }
+
+      return pages;
+    })
     .join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

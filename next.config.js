@@ -3,6 +3,17 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
 
+  async redirects() {
+    return [
+      // Fix typo: /betkenis/* → /betekenis/*
+      {
+        source: '/betkenis/:path*',
+        destination: '/betekenis/:path*',
+        permanent: true, // 301
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       // Clean sitemap URLs for crawlers
@@ -15,6 +26,12 @@ const nextConfig = {
     return [
       {
         source: '/betekenis/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
+        source: '/synoniem/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, s-maxage=86400, stale-while-revalidate=604800' },
         ],
