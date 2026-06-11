@@ -99,14 +99,6 @@ function Header() {
     <header className="site-header">
       <div className="site-container header-inner">
         <a href="/" className="site-logo" aria-label="Woordenboek.org — Startpagina">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="3" y="4" width="20" height="26" rx="2" stroke="currentColor" strokeWidth="2" />
-            <rect x="9" y="2" width="20" height="26" rx="2" fill="var(--color-primary)" stroke="var(--color-primary)" strokeWidth="1" />
-            <line x1="13" y1="9" x2="25" y2="9" stroke="var(--color-text-inverse)" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="13" y1="13" x2="23" y2="13" stroke="var(--color-text-inverse)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-            <line x1="13" y1="17" x2="21" y2="17" stroke="var(--color-text-inverse)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-            <line x1="13" y1="21" x2="24" y2="21" stroke="var(--color-text-inverse)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-          </svg>
           <span className="logo-text">
             woorden<span>boek</span>
           </span>
