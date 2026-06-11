@@ -3,6 +3,7 @@ import './style.css';
 import { GoogleAnalytics } from '../components/Analytics';
 import { AdSenseScript } from '../components/AdSense';
 import { CookieConsent } from '../components/CookieConsent';
+import HeaderSearch from '../components/HeaderSearch';
 
 export const metadata = {
   metadataBase: new URL('https://woordenboek.org'),
@@ -111,14 +112,7 @@ function Header() {
           </span>
         </a>
 
-        <div className="header-actions">
-          <a href="/" className="theme-toggle" aria-label="Zoeken" style={{ textDecoration: 'none' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </a>
-        </div>
+        <HeaderSearch />
       </div>
     </header>
   );

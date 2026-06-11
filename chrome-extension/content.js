@@ -1,15 +1,14 @@
 /**
- * Content script — double-click word selection popup
- * Shows a lightweight preview popup near the selected word.
- * Users click "Meer op Woordenboek.org" for the full page.
+ * Content script — injected by background.js via chrome.scripting
+ * Shows popup near selected word with meaning, synonyms, translations.
  */
 
 const API_BASE = 'https://www.woordenboek.org/api/lookup';
 let popupEl = null;
-let isLoading = false;
 
 /* ---- Create popup element ---- */
 function createPopup() {
+  if (popupEl) return popupEl;
   const popup = document.createElement('div');
   popup.id = 'wb-popup';
   popup.innerHTML = `
@@ -46,24 +45,20 @@ function createPopup() {
 
 /* ---- Show / hide ---- */
 function showPopup(x, y) {
-  if (!popupEl) createPopup();
-  popupEl.style.display = 'block';
-
-  // Position: prefer below-right, but keep in viewport
-  const rect = popupEl.getBoundingClientRect();
+  const popup = createPopup();
+  popup.style.display = 'block';
+  // Position: prefer below-right, keep in viewport
   let left = x + 10;
   let top = y + 10;
   if (left + 320 > window.innerWidth) left = x - 330;
   if (top + 200 > window.innerHeight) top = y - 210;
-  popupEl.style.left = Math.max(5, left) + 'px';
-  popupEl.style.top = Math.max(5, top) + 'px';
+  popup.style.left = Math.max(5, left) + 'px';
+  popup.style.top = Math.max(5, top) + window.scrollY + 'px';
 }
 
 function hidePopup() {
   if (popupEl) {
     popupEl.style.display = 'none';
-    popupEl.querySelector('.wb-loading').style.display = 'none';
-    popupEl.querySelector('.wb-body').style.display = 'block';
   }
 }
 
@@ -76,14 +71,14 @@ function renderData(data) {
   if (!data.found) {
     popupEl.querySelector('.wb-word').textContent = data.word;
     popupEl.querySelector('.wb-meaning').textContent = 'Woord niet gevonden.';
-    popupEl.querySelector('.wb-link').href = data.url;
+    popupEl.querySelector('.wb-link').href = data.url || '#';
     popupEl.querySelector('.wb-synonyms').style.display = 'none';
     popupEl.querySelector('.wb-translations').style.display = 'none';
     return;
   }
 
   popupEl.querySelector('.wb-word').textContent = data.word;
-  popupEl.querySelector('.wb-pos').textContent = data.gender ? `(${data.gender})` : '';
+  popupEl.querySelector('.wb-pos').textContent = data.partOfSpeech || (data.gender ? `(${data.gender})` : '');
   popupEl.querySelector('.wb-meaning').textContent = data.meaning || 'Geen betekenis beschikbaar.';
   popupEl.querySelector('.wb-link').href = data.url;
 
@@ -110,36 +105,15 @@ function renderData(data) {
   }
 }
 
-/* ---- Double-click handler ---- */
-document.addEventListener('dblclick', (e) => {
-  // Don't trigger in inputs/textareas or inside our own popup
-  if (popupEl && popupEl.contains(e.target)) return;
-  const tag = e.target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-
-  const selection = window.getSelection();
-  const text = (selection ? selection.toString().trim() : '');
-
-  // Only accept single words (allow hyphenated)
-  if (!text || text.includes(' ') || text.length > 40) return;
-
-  // Must be mostly letters
-  if (!/^[a-zA-ZäëïöüáéíóúàèìòùâêîôûñçÄËÏÖÜÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÑÇ-]+$/.test(text)) return;
-
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-
-  showPopup(rect.left + window.scrollX, rect.bottom + window.scrollY);
-
-  // Show loading
+/* ---- Fetch and show ---- */
+function lookupAndShow(word, x, y) {
+  showPopup(x, y);
   popupEl.querySelector('.wb-body').style.display = 'none';
   popupEl.querySelector('.wb-loading').style.display = 'block';
-  popupEl.querySelector('.wb-word').textContent = text;
+  popupEl.querySelector('.wb-word').textContent = word;
   popupEl.querySelector('.wb-pos').textContent = '';
 
-  // Fetch data
-  const url = `${API_BASE}?q=${encodeURIComponent(text.toLowerCase())}`;
-  fetch(url)
+  fetch(`${API_BASE}?q=${encodeURIComponent(word)}`)
     .then(r => r.json())
     .then(data => renderData(data))
     .catch(() => {
@@ -147,4 +121,19 @@ document.addEventListener('dblclick', (e) => {
       popupEl.querySelector('.wb-body').style.display = 'block';
       popupEl.querySelector('.wb-meaning').textContent = 'Kon geen gegevens ophalen.';
     });
+}
+
+/* ---- Listen for messages from background (context menu trigger) ---- */
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'showPopup' && msg.word) {
+    // Show near cursor/selection
+    const sel = window.getSelection();
+    let x = 200, y = 200;
+    if (sel && sel.rangeCount > 0) {
+      const rect = sel.getRangeAt(0).getBoundingClientRect();
+      x = rect.left;
+      y = rect.bottom;
+    }
+    lookupAndShow(msg.word, x, y);
+  }
 });

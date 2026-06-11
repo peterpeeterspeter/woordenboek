@@ -1,5 +1,6 @@
 /**
- * Background service worker — context menu + badge counter
+ * Background service worker — context menu + programmatic content script injection
+ * Uses activeTab instead of broad host_permissions for faster Chrome Web Store review.
  */
 
 const API_BASE = 'https://www.woordenboek.org/api/lookup';
@@ -13,41 +14,53 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+/* ---- Context menu click → inject content script, then show popup ---- */
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'woordenboek-lookup' && info.selectionText) {
-    const word = info.selectionText.trim();
-    if (word) {
-      // Open the full page in a new tab
-      const url = `https://www.woordenboek.org/betekenis/${encodeURIComponent(word.toLowerCase())}`;
-      chrome.tabs.create({ url });
-    }
-  }
+  const word = (info.selectionText || '').trim().toLowerCase();
+  if (!word || word.includes(' ') || word.length > 40) return;
+
+  // Inject content script + CSS into active tab (activeTab grants access)
+  chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ['content.css'] });
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ['content.js']
+  }, () => {
+    // After injection, send lookup message to the content script
+    chrome.tabs.sendMessage(tab.id, { type: 'showPopup', word });
+  });
 });
 
-/* ---- Message handler for lookup requests from popup/content ---- */
+/* ---- Popup search handler ---- */
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'lookup' && msg.word) {
-    const url = `${API_BASE}?q=${encodeURIComponent(msg.word.trim().toLowerCase())}`;
-    fetch(url)
-      .then(r => r.json())
-      .then(data => {
-        // Save to recent searches
-        chrome.storage.local.get({ recent: [] }, (result) => {
-          const recent = result.recent.filter(w => w !== msg.word.trim().toLowerCase());
-          recent.unshift(msg.word.trim().toLowerCase());
-          if (recent.length > 20) recent.length = 20;
-          chrome.storage.local.set({ recent });
-        });
-        sendResponse(data);
-      })
-      .catch(err => sendResponse({ error: err.message }));
-    return true; // async response
+  if (msg.type === 'lookup') {
+    lookupWord(msg.word).then(sendResponse);
+    return true; // async
   }
 
   if (msg.type === 'getRecent') {
-    chrome.storage.local.get({ recent: [] }, (result) => {
-      sendResponse({ recent: result.recent });
+    chrome.storage.local.get(['recent'], (r) => {
+      sendResponse({ recent: r.recent || [] });
     });
     return true;
   }
 });
+
+/* ---- API call ---- */
+async function lookupWord(word) {
+  try {
+    const res = await fetch(`${API_BASE}?q=${encodeURIComponent(word)}`);
+    if (!res.ok) return { word, found: false, error: `HTTP ${res.status}` };
+    const data = await res.json();
+
+    // Save to recent
+    chrome.storage.local.get(['recent'], (r) => {
+      const recent = (r.recent || []).filter(w => w !== word);
+      recent.unshift(word);
+      chrome.storage.local.set({ recent: recent.slice(0, 50) });
+    });
+
+    return data;
+  } catch (err) {
+    return { word, found: false, error: err.message };
+  }
+}

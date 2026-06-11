@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Woordenboek.org — Nederlands woordenboek",
-  "description": "Zoek direct Nederlandse betekenissen, synoniemen en vertalingen op terwijl je leest of schrijft. Selecteer een woord, klik met rechts en open de betekenis op Woordenboek.org.",
+  "description": "Zoek direct betekenissen, synoniemen en vertalingen. Selecteer een woord op elke pagina en bekijk de betekenis.",
   "version": "1.0.0",
   "homepage_url": "https://www.woordenboek.org/",
   "icons": {
@@ -9,37 +9,15 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [
-    "activeTab",
-    "contextMenus",
-    "storage"
-  ],
+  "permissions": ["activeTab", "contextMenus", "storage", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
-    },
-    "default_title": "Woordenboek.org"
-  },
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+W",
-        "mac": "Command+Shift+W"
-      },
-      "description": "Open Woordenboek.org zoekbalk"
     }
   }
 }
