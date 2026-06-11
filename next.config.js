@@ -36,6 +36,12 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'public, s-maxage=86400, stale-while-revalidate=604800' },
         ],
       },
+      {
+        source: '/vertaling/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=86400, stale-while-revalidate=604800' },
+        ],
+      },
     ];
   },
 };

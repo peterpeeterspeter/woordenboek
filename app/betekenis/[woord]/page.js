@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getWordEntry, GENDER_MAP, LANG_NAMES, POPULAR_WORDS } from '../../../lib/dictionary';
+import { getWordEntry, getWordList, GENDER_MAP, LANG_NAMES, POPULAR_WORDS } from '../../../lib/dictionary';
+import { AdUnit } from '../../../components/AdSense';
 
 /* ---------- ISR config ---------- */
 
@@ -157,6 +158,9 @@ export default function WordPage({ params }) {
         </div>
       )}
 
+      {/* Ad after main content (definition + etymology) — desktop focused */}
+      <AdUnit slot="betekenis-after-content" format="auto" style={{ minHeight: '90px' }} />
+
       {/* Synonyms */}
       {synonyms.length > 0 && (
         <section className="related-section">
@@ -242,11 +246,19 @@ export default function WordPage({ params }) {
         )}
       </div>
 
+      {/* Ad before cross-links — bottom of content, high visibility */}
+      <AdUnit slot="betekenis-bottom" format="auto" style={{ minHeight: '250px' }} />
+
       {/* Cross-links to related pages */}
       <div className="syn-nav-links">
         <Link href={`/synoniem/${encodeURIComponent(displayWord)}`} className="syn-nav-link">
           📖 Synoniemen van {displayWord}
         </Link>
+        {dict?.tr?.en?.length > 0 && (
+          <Link href={`/vertaling/nederlands-engels/${encodeURIComponent(displayWord)}`} className="syn-nav-link">
+            🌍 Vertaal {displayWord}
+          </Link>
+        )}
       </div>
 
       {/* Prev/next navigation */}
@@ -258,6 +270,34 @@ export default function WordPage({ params }) {
           <Link href={`/betekenis/${encodeURIComponent(nextWord)}`}>{nextWord} →</Link>
         ) : <span />}
       </nav>
+
+      {/* More words from same letter */}
+      {(() => {
+        const sameLetterWords = getWordList(letter.toLowerCase());
+        const others = sameLetterWords
+          .filter(w => w.toLowerCase() !== displayWord.toLowerCase());
+        // Deterministic pseudo-random pick using word hash
+        const hash = [...displayWord].reduce((a, c) => a + c.charCodeAt(0), 0);
+        const picked = others
+          .sort((a, b) => {
+            const ha = [...a].reduce((s, c) => s + c.charCodeAt(0), 0);
+            const hb = [...b].reduce((s, c) => s + c.charCodeAt(0), 0);
+            return ((ha * hash) % 1000) - ((hb * hash) % 1000);
+          })
+          .slice(0, 10);
+        return picked.length > 0 ? (
+          <section className="related-section">
+            <h2 className="related-title">Meer woorden met {letter}</h2>
+            <div className="related-words">
+              {picked.map((w) => (
+                <Link key={w} href={`/betekenis/${encodeURIComponent(w)}`} className="related-tag">
+                  {w}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null;
+      })()}
     </div>
   );
 }

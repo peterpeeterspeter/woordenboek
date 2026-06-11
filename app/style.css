@@ -618,6 +618,44 @@ main {
   color: var(--color-primary);
 }
 
+/* --- Tag cloud (homepage popular words) --- */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* --- Section heading (homepage sub-sections) --- */
+.section-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-primary);
+  margin-bottom: var(--space-6);
+}
+
+/* --- Categories grid --- */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.category-card {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+
+.category-card h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+
 /* --- Loading --- */
 .loading {
   display: flex;
@@ -1284,4 +1322,69 @@ main {
 }
 .legal-page a:hover {
   text-decoration: underline;
+}
+
+/* --- Translation hero card (vertaling page) --- */
+.trans-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.trans-hero-card {
+  background: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.trans-hero-label {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.trans-hero-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.trans-hero-word {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  background: var(--color-surface);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+}
+
+.trans-hero-ipa {
+  margin-bottom: var(--space-3);
+}
+
+.trans-hero-meta {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.trans-pos-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  text-transform: lowercase;
 }

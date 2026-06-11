@@ -1,8 +1,18 @@
 import Link from 'next/link';
-import { getIndex, LETTERS } from '../lib/dictionary';
+import { getIndex, LETTERS, POPULAR_WORDS } from '../lib/dictionary';
 import SearchBox from '../components/SearchBox';
+import { AdUnit } from '../components/AdSense';
 
 export const revalidate = 86400; // 1 day
+
+const CATEGORIES = [
+  { name: 'Dieren', words: ['hond','kat','paard','vogel'] },
+  { name: 'Kleuren', words: ['rood','blauw','groen','geel'] },
+  { name: 'Getallen', words: ['een','twee','drie','vier','vijf'] },
+  { name: 'Familie', words: ['moeder','vader','broer','zus','familie'] },
+  { name: 'Natuur', words: ['zon','maan','ster','regen','zee'] },
+  { name: 'Eten', words: ['brood','kaas','melk','koffie','vis'] },
+];
 
 const COMMON_WORDS = [
   'avontuur','bibliotheek','chocolade','diamant','erfgoed','fietspad',
@@ -39,6 +49,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Ad below WotD — homepage prime position */}
+      <AdUnit slot="homepage-below-wotd" format="auto" style={{ minHeight: '90px' }} />
+
       <section>
         <h2 className="letter-heading" style={{ marginBottom: 'var(--space-6)' }}>
           Blader op letter
@@ -56,6 +69,35 @@ export default function HomePage() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-heading">Populaire woorden</h2>
+        <div className="tag-cloud">
+          {POPULAR_WORDS.slice(0, 70).map((w) => (
+            <Link key={w} href={`/betekenis/${encodeURIComponent(w)}`} className="related-tag">
+              {w}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-heading">Woorden per categorie</h2>
+        <div className="categories-grid">
+          {CATEGORIES.map((cat) => (
+            <div key={cat.name} className="category-card">
+              <h3>{cat.name}</h3>
+              <div className="tag-cloud">
+                {cat.words.map((w) => (
+                  <Link key={w} href={`/betekenis/${encodeURIComponent(w)}`} className="related-tag">
+                    {w}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

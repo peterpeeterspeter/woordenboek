@@ -36,6 +36,18 @@ export async function GET(request, { params }) {
         );
       }
 
+      // Add vertaling page if word has English translation
+      if (entry?.tr?.en?.length > 0) {
+        pages.push(
+          `  <url>
+    <loc>${base}/vertaling/nederlands-engels/${encodeURIComponent(w)}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`
+        );
+      }
+
       return pages;
     })
     .join('\n');
