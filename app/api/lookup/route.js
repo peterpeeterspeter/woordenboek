@@ -40,19 +40,23 @@ export async function GET(request) {
   let meaning = '';
   let gender = '';
   let ipa = '';
+  let partOfSpeech = '';
 
   if (dict) {
     if (dict.g && GENDER_MAP[dict.g]) gender = GENDER_MAP[dict.g];
     if (dict.i) ipa = dict.i;
 
-    if (dict.s && Array.isArray(dict.s) && dict.s.length > 0) {
-      const first = dict.s[0];
-      if (typeof first === 'string') {
+    const senses = dict.s;
+    if (senses && Array.isArray(senses) && senses.length > 0) {
+      const first = senses[0];
+      if (first && first.p) partOfSpeech = first.p;
+      // Data structure: { p: "woordsoort", d: [{ t: "definitie", x: [...] }, ...] }
+      if (first && first.d && Array.isArray(first.d) && first.d.length > 0) {
+        meaning = first.d[0].t || first.d[0].d || '';
+      } else if (typeof first === 'string') {
         meaning = first;
-      } else if (first.def) {
-        meaning = first.def;
-      } else if (first.d) {
-        meaning = first.d;
+      } else if (first && first.t) {
+        meaning = first.t;
       }
     }
     // Truncate to ~200 chars for popup display
@@ -86,6 +90,7 @@ export async function GET(request) {
     found: true,
     gender,
     ipa,
+    partOfSpeech,
     meaning,
     synonyms: topSynonyms,
     antonyms: topAntonyms,
