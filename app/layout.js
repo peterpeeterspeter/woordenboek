@@ -24,7 +24,7 @@ export const metadata = {
     'google-adsense-account': 'ca-pub-4890613119082560',
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'sAJEfH0bMA7UwrbWU6HYq9EbGb-mVHDAUMyUE3XkW2Q',
   },
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>",
