@@ -1281,3 +1281,53 @@ main {
   color: var(--color-text-muted);
   margin-top: var(--space-2);
 }
+
+/* ---- Chrome Extension Banner ---- */
+.ext-banner {
+  margin: var(--space-6) 0;
+  border: 1px solid #e0e8f0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f0f5fb 0%, #e8eef7 100%);
+  padding: 0;
+  overflow: hidden;
+}
+.ext-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #333;
+}
+.ext-banner-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+.ext-banner-content strong {
+  color: #1a4d8f;
+}
+.ext-banner-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: #1a4d8f;
+  color: #fff !important;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.ext-banner-btn:hover {
+  background: #153d73;
+}
+@media (max-width: 600px) {
+  .ext-banner-content {
+    flex-wrap: wrap;
+  }
+  .ext-banner-btn {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -101,6 +101,23 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="ext-banner">
+        <div className="ext-banner-content">
+          <span className="ext-banner-icon">🧩</span>
+          <div>
+            <strong>Chrome-extensie</strong> — Selecteer een woord op een willekeurige pagina en zie direct de betekenis.
+          </div>
+          <a
+            href="https://chromewebstore.google.com/detail/woordenboekorg-nederlands/UPLOAD_PENDING"
+            className="ext-banner-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Gratis installeren
+          </a>
+        </div>
+      </section>
+
       <section className="info-grid">
         <div className="info-card">
           <svg className="info-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -1,0 +1,109 @@
+/* Woordenboek.org popup styles */
+#wb-popup {
+  display: none;
+  position: absolute;
+  z-index: 2147483647;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+#wb-popup * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.wb-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px 6px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.wb-word {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a4d8f;
+}
+
+.wb-pos {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+.wb-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.wb-close:hover {
+  color: #333;
+}
+
+.wb-body {
+  padding: 10px 14px;
+}
+
+.wb-meaning {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.wb-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.wb-label {
+  color: #888;
+  font-weight: 600;
+  min-width: 70px;
+}
+
+.wb-values {
+  color: #444;
+}
+
+.wb-footer {
+  padding: 8px 14px 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.wb-link {
+  color: #1a4d8f;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.wb-link:hover {
+  text-decoration: underline;
+}
+
+.wb-loading {
+  padding: 20px 14px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}

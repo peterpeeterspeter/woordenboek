@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Woordenboek.org</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <div class="popup-header">
+      <img src="icons/icon48.png" alt="" class="popup-logo">
+      <span class="popup-title">Woordenboek.org</span>
+    </div>
+
+    <div class="popup-search">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Zoek een woord..."
+        autocomplete="off"
+        autofocus
+      >
+      <button id="searchBtn" title="Zoeken">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="resultArea" class="popup-result" style="display:none">
+      <div class="result-word">
+        <span id="resultWord"></span>
+        <span id="resultGender" class="result-gender"></span>
+      </div>
+      <div id="resultMeaning" class="result-meaning"></div>
+
+      <div id="resultSynonyms" class="result-section" style="display:none">
+        <span class="result-label">Synoniemen</span>
+        <div id="resultSynList" class="result-tags"></div>
+      </div>
+
+      <div id="resultTranslations" class="result-section" style="display:none">
+        <span class="result-label">Vertaling</span>
+        <div id="resultTransList" class="result-tags"></div>
+      </div>
+
+      <a id="resultLink" class="result-link" href="#" target="_blank">
+        Bekijk volledige betekenis →
+      </a>
+    </div>
+
+    <div id="errorArea" class="popup-error" style="display:none">
+      <span id="errorMsg"></span>
+    </div>
+
+    <div id="loadingArea" class="popup-loading" style="display:none">
+      <div class="spinner"></div>
+      Zoeken...
+    </div>
+
+    <div id="recentArea" class="popup-recent" style="display:none">
+      <div class="recent-header">Recent opgezocht</div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+
+    <div class="popup-footer">
+      <a href="https://www.woordenboek.org/" target="_blank" rel="noopener">
+        www.woordenboek.org
+      </a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
