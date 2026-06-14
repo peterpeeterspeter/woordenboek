@@ -6,22 +6,20 @@ import { CookieConsent } from '../components/CookieConsent';
 import HeaderSearch from '../components/HeaderSearch';
 
 export const metadata = {
-  metadataBase: new URL('https://woordenboek.org'),
+  metadataBase: new URL('https://www.woordenboek.org'),
   title: {
-    default: 'Woordenboek.org — Nederlands Woordenboek met 400.000+ woorden',
+    default: 'Woordenboek.org — Gratis Nederlands Woordenboek',
     template: '%s — Woordenboek.org',
   },
   description:
-    'Gratis online Nederlands woordenboek met meer dan 400.000 woorden. Zoek elk Nederlands woord op, ontdek verwante woorden en blader door het alfabet.',
-  keywords: ['woordenboek', 'Nederlands', 'Dutch dictionary', 'Nederlandse woorden', 'woordenlijst', 'spelling'],
+    'Betekenis, synoniemen, vertalingen en uitspraak van 400.000+ Nederlandse woorden. Snel, gratis en zonder registratie. Blader of zoek direct.',
+  keywords: ['woordenboek', 'Nederlands', 'betekenis', 'synoniemen', 'vertaling', 'Dutch dictionary', 'spelling'],
   openGraph: {
     type: 'website',
     locale: 'nl_NL',
     siteName: 'Woordenboek.org',
   },
   other: {
-    generator: 'Perplexity Computer',
-    author: 'Perplexity Computer',
     'google-adsense-account': 'ca-pub-4890613119082560',
   },
   verification: {
@@ -36,11 +34,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
-        {/* Perplexity Computer Attribution */}
-        <meta name="generator" content="Perplexity Computer" />
-        <meta property="og:see_also" content="https://www.perplexity.ai/computer" />
-        <link rel="author" href="https://www.perplexity.ai/computer" />
-
         {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -61,17 +54,12 @@ export default function RootLayout({ children }) {
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'Woordenboek.org',
-              url: 'https://woordenboek.org',
-              description: 'Gratis online Nederlands woordenboek met meer dan 400.000 woorden',
+              url: 'https://www.woordenboek.org',
+              description: 'Gratis online Nederlands woordenboek met 400.000+ woorden — betekenis, synoniemen, vertalingen',
               inLanguage: 'nl',
-              creator: {
-                '@type': 'SoftwareApplication',
-                name: 'Perplexity Computer',
-                url: 'https://www.perplexity.ai/computer',
-              },
               potentialAction: {
                 '@type': 'SearchAction',
-                target: 'https://woordenboek.org/zoek/{search_term_string}',
+                target: 'https://www.woordenboek.org/zoek/{search_term_string}',
                 'query-input': 'required name=search_term_string',
               },
             }),
@@ -150,9 +138,6 @@ function Footer() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 Woordenboek.org — OpenTaal (BSD/CC-BY) &amp; WikiWoordenboek (CC-BY-SA)</span>
-          <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
-            Created with Perplexity Computer
-          </a>
         </div>
       </div>
     </footer>

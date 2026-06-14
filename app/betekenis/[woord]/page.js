@@ -69,15 +69,10 @@ export default function WordPage({ params }) {
     inDefinedTermSet: {
       '@type': 'DefinedTermSet',
       name: 'Nederlands Woordenboek',
-      url: 'https://woordenboek.org',
+      url: 'https://www.woordenboek.org',
     },
     inLanguage: 'nl',
-    url: `https://woordenboek.org/betekenis/${encodeURIComponent(displayWord)}`,
-    creator: {
-      '@type': 'SoftwareApplication',
-      name: 'Perplexity Computer',
-      url: 'https://www.perplexity.ai/computer',
-    },
+    url: `https://www.woordenboek.org/betekenis/${encodeURIComponent(displayWord)}`,
   };
 
   return (
