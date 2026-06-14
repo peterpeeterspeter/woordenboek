@@ -36,7 +36,7 @@ export function generateMetadata({ params }) {
     title: `${word} — Betekenis & definitie`,
     description,
     openGraph: {
-      title: `${word} — Betekenis & definitie — Woordenboek.org`,
+      title: `${word} — Betekenis & definitie`,
       description,
     },
     alternates: {

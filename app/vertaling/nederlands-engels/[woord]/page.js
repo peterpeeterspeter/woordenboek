@@ -26,7 +26,7 @@ export function generateMetadata({ params }) {
 
   if (!enWords?.length) {
     return {
-      title: `Vertaling ${word} — Woordenboek.org`,
+      title: `Vertaling ${word}`,
       description: `Vertaling van "${word}" in het Nederlands woordenboek.`,
     };
   }
@@ -38,7 +38,7 @@ export function generateMetadata({ params }) {
     title: `Nederlands → Engels: ${word} (${enStr})`,
     description,
     openGraph: {
-      title: `Vertaling ${word} — Nederlands-Engels — Woordenboek.org`,
+      title: `Vertaling ${word} — Nederlands-Engels`,
       description,
     },
     alternates: {

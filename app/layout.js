@@ -19,6 +19,9 @@ export const metadata = {
     locale: 'nl_NL',
     siteName: 'Woordenboek.org',
   },
+  alternates: {
+    canonical: 'https://www.woordenboek.org/',
+  },
   other: {
     'google-adsense-account': 'ca-pub-4890613119082560',
   },

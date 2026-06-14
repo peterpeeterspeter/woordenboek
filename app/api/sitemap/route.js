@@ -1,7 +1,7 @@
 import { LETTERS } from '../../../lib/dictionary';
 
 export async function GET() {
-  const base = 'https://woordenboek.org';
+  const base = 'https://www.woordenboek.org';
   const today = new Date().toISOString().split('T')[0];
 
   const entries = LETTERS.map(

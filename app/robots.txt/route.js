@@ -4,7 +4,7 @@ Allow: /
 Disallow: /api/
 Disallow: /zoek/
 
-Sitemap: https://woordenboek.org/sitemap.xml
+Sitemap: https://www.woordenboek.org/sitemap.xml
 `;
 
   return new Response(body, {

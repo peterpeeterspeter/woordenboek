@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
 
   const words = getDefinedWordsForLetter(l);
   const dictData = getDictData(l);
-  const base = 'https://woordenboek.org';
+  const base = 'https://www.woordenboek.org';
   const today = new Date().toISOString().split('T')[0];
 
   const urls = words

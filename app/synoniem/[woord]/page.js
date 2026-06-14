@@ -26,7 +26,7 @@ export function generateMetadata({ params }) {
 
   if (!entry || !entry.synonyms || entry.synonyms.length === 0) {
     return {
-      title: `Synoniemen van "${word}" — Woordenboek.org`,
+      title: `Synoniemen van "${word}"`,
       description: `Zoek synoniemen van "${word}" in het Nederlands woordenboek.`,
     };
   }
@@ -35,10 +35,10 @@ export function generateMetadata({ params }) {
   const description = `Synoniemen van ${word}: ${synList}${entry.synonyms.length > 6 ? ' en meer' : ''}. Bekijk alle synoniemen, antoniemen en verwante woorden in het Nederlands woordenboek.`;
 
   return {
-    title: `Synoniemen van ${word} — Woordenboek.org`,
+    title: `Synoniemen van ${word}`,
     description,
     openGraph: {
-      title: `Synoniemen van ${word} — Woordenboek.org`,
+      title: `Synoniemen van ${word}`,
       description,
     },
     alternates: {
