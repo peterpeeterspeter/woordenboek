@@ -18,6 +18,7 @@ const nextConfig = {
     return [
       // Clean sitemap URLs for crawlers
       { source: '/sitemap.xml', destination: '/api/sitemap' },
+      { source: '/sitemap-core.xml', destination: '/api/sitemap-core' },
       { source: '/sitemap-:letter.xml', destination: '/api/sitemap-letter/:letter' },
     ];
   },
