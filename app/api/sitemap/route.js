@@ -4,16 +4,24 @@ export async function GET() {
   const base = 'https://www.woordenboek.org';
   const today = new Date().toISOString().split('T')[0];
 
-  const entries = LETTERS.map(
+  // Letter sub-sitemaps (word pages)
+  const letterEntries = LETTERS.map(
     (l) => `  <sitemap>
     <loc>${base}/sitemap-${l}.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>`
   ).join('\n');
 
+  // Core pages sitemap (browse pages, homepage, static pages)
+  const coreEntry = `  <sitemap>
+    <loc>${base}/sitemap-core.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>`;
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${entries}
+${coreEntry}
+${letterEntries}
 </sitemapindex>`;
 
   return new Response(xml, {

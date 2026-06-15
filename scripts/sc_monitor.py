@@ -113,8 +113,8 @@ def main():
         errors = sm.get('errors', [])
         warnings = sm.get('warnings', [])
         contents = sm.get('contents', [])
-        total_urls = sum(c.get('submitted', 0) for c in contents) if contents else 0
-        indexed = sum(c.get('indexed', 0) for c in contents) if contents else 0
+        total_urls = sum(int(c.get("submitted", 0)) for c in contents) if contents else 0
+        indexed = sum(int(c.get("indexed", 0)) for c in contents) if contents else 0
         status = "PENDING" if is_pending else sm.get('lastDownloaded', 'N/A')
         print(f"  ...{path}")
         print(f"    Submitted: {last_submitted} | URLs: {total_urls} | Indexed: {indexed}")
