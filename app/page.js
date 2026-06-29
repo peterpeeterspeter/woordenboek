@@ -5,6 +5,10 @@ import { AdUnit } from '../components/AdSense';
 
 export const revalidate = 86400; // 1 day
 
+export const metadata = {
+  alternates: { canonical: '/' },
+};
+
 const CATEGORIES = [
   { name: 'Dieren', emoji: '🐕', words: ['hond','kat','paard','vogel','konijn'] },
   { name: 'Kleuren', emoji: '🎨', words: ['rood','blauw','groen','geel','zwart'] },

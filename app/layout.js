@@ -1,6 +1,7 @@
 import './base.css';
 import './style.css';
-import { GoogleAnalytics } from '../components/Analytics';
+import { Suspense } from 'react';
+import { GoogleAnalytics, AnalyticsPageView } from '../components/Analytics';
 import { AdSenseScript } from '../components/AdSense';
 import { CookieConsent } from '../components/CookieConsent';
 import HeaderSearch from '../components/HeaderSearch';
@@ -19,9 +20,6 @@ export const metadata = {
     locale: 'nl_NL',
     siteName: 'Woordenboek.org',
   },
-  alternates: {
-    canonical: 'https://www.woordenboek.org/',
-  },
   other: {
     'google-adsense-account': 'ca-pub-4890613119082560',
   },
@@ -29,7 +27,7 @@ export const metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'sAJEfH0bMA7UwrbWU6HYq9EbGb-mVHDAUMyUE3XkW2Q',
   },
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>",
+    icon: '/icon.svg',
   },
 };
 
@@ -77,6 +75,9 @@ export default function RootLayout({ children }) {
         <Footer />
         <ThemeScript />
         <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <AnalyticsPageView />
+        </Suspense>
         <AdSenseScript />
         <CookieConsent />
       </body>

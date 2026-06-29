@@ -8,11 +8,21 @@ export function generateStaticParams() {
   return LETTERS.map((l) => ({ letter: l }));
 }
 
-export function generateMetadata({ params }) {
-  const L = params.letter.toUpperCase();
+export function generateMetadata({ params, searchParams }) {
+  const l = params.letter.toLowerCase();
+  const L = l.toUpperCase();
+  const page = Math.max(1, parseInt(searchParams?.p) || 1);
+
   return {
-    title: `Woorden met ${L}`,
-    description: `Alle Nederlandse woorden die beginnen met de letter ${L}. Blader door de woordenlijst.`,
+    title: page > 1 ? `Woorden met ${L} — pagina ${page}` : `Woorden met ${L}`,
+    description:
+      page > 1
+        ? `Nederlandse woorden met de letter ${L}, pagina ${page}.`
+        : `Alle Nederlandse woorden die beginnen met de letter ${L}. Blader door de woordenlijst.`,
+    alternates: {
+      canonical: `/letter/${l}`,
+    },
+    robots: page > 1 ? { index: false, follow: true } : undefined,
   };
 }
 
@@ -45,7 +55,7 @@ export default function LetterPage({ params, searchParams }) {
       </nav>
 
       <div className="letter-heading">
-        <span>{L}</span>
+        <h1>{currentPage > 1 ? `Woorden met ${L} — pagina ${currentPage}` : `Woorden met ${L}`}</h1>
         <span className="letter-count">{total.toLocaleString('nl-NL')} woorden</span>
       </div>
 

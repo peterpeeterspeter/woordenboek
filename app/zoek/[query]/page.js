@@ -8,7 +8,8 @@ export function generateMetadata({ params }) {
   return {
     title: `Zoeken: "${query}"`,
     description: `Zoekresultaten voor "${query}" in het Nederlands woordenboek.`,
-    robots: { index: false }, // Don't index search result pages
+    robots: { index: false, follow: true }, // Don't index search result pages, but follow result links
+    alternates: { canonical: `/zoek/${encodeURIComponent(query)}` },
   };
 }
 
