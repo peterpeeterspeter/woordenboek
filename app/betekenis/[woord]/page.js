@@ -32,9 +32,13 @@ export function generateMetadata({ params }) {
     ? `${word}: ${firstDef.slice(0, 150)}${firstDef.length > 150 ? '…' : ''}`
     : `Betekenis en definitie van "${word}" in het Nederlands woordenboek.`;
 
+  // noindex orphan pages without a definition — saves crawl budget
+  const hasDefinition = !!firstDef;
+
   return {
     title: `${word} — Betekenis & definitie`,
     description,
+    ...( !hasDefinition && { robots: { index: false, follow: true } } ),
     openGraph: {
       title: `${word} — Betekenis & definitie`,
       description,
@@ -75,9 +79,24 @@ export default function WordPage({ params }) {
     url: `https://www.woordenboek.org/betekenis/${encodeURIComponent(displayWord)}`,
   };
 
+  // FAQ schema for pages with definitions — targets featured snippets
+  const faqLd = hasDef ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [{
+      '@type': 'Question',
+      name: `Wat is de betekenis van ${displayWord}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `${displayWord} betekent: ${firstDef}`,
+      },
+    }],
+  } : null;
+
   return (
     <div className="page-content word-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <nav className="breadcrumb">
         <Link href="/">Start</Link>
@@ -107,29 +126,59 @@ export default function WordPage({ params }) {
 
       {/* Definitions */}
       {hasDef ? (
-        <div className="dict-card">
-          <h2 className="dict-card-title">Betekenis</h2>
-          {dict.s.map((posGroup, gi) => (
-            <div key={gi} className="dict-pos-group">
-              <div className="dict-pos-label">{posGroup.p}</div>
-              <ol className="dict-senses">
-                {posGroup.d.map((d, di) => (
-                  <li key={di} className="dict-sense">
-                    {d.g?.length > 0 && (
-                      <span className="dict-tags">{d.g.join(', ')} </span>
-                    )}
-                    <span className="dict-def">{d.t}</span>
-                    {d.x?.map((ex, xi) => (
-                      <div key={xi} className="dict-example">{ex}</div>
-                    ))}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ))}
-        </div>
+        <>
+          {/* Featured-snippet Q&A block — targets "X betekenis" queries */}
+          <section className="dict-snippet-answer">
+            <h2 className="dict-card-title">Wat is de betekenis van {displayWord}?</h2>
+            <p className="dict-snippet-text">
+              <strong>{displayWord}</strong> betekent: {firstDef}
+            </p>
+          </section>
+
+          <div className="dict-card">
+            <h2 className="dict-card-title">Betekenis</h2>
+            {dict.s.map((posGroup, gi) => (
+              <div key={gi} className="dict-pos-group">
+                <div className="dict-pos-label">{posGroup.p}</div>
+                <ol className="dict-senses">
+                  {posGroup.d.map((d, di) => (
+                    <li key={di} className="dict-sense">
+                      {d.g?.length > 0 && (
+                        <span className="dict-tags">{d.g.join(', ')} </span>
+                      )}
+                      <span className="dict-def">{d.t}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+
+          {/* Examples section — extracted for better heading structure */}
+          {(() => {
+            const allExamples = [];
+            dict.s.forEach((posGroup) => {
+              posGroup.d.forEach((d) => {
+                if (d.x?.length > 0) {
+                  allExamples.push(...d.x);
+                }
+              });
+            });
+            return allExamples.length > 0 ? (
+              <section className="dict-examples-section">
+                <h2 className="dict-card-title">Voorbeelden van &quot;{displayWord}&quot; in een zin</h2>
+                <ul className="dict-example-list">
+                  {allExamples.slice(0, 5).map((ex, i) => (
+                    <li key={i} className="dict-example-item">{ex}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null;
+          })()}
+        </>
       ) : (
         <div className="word-info-card">
+          {/* noindex signal for orphan pages without definition */}
           <div className="word-info-row">
             <span className="word-info-label">Letters</span>
             <span className="word-info-value">{charCount}</span>
