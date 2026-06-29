@@ -1,6 +1,7 @@
 export const metadata = {
   title: 'Over dit woordenboek',
   description: 'Over Woordenboek.org — een gratis, open-source Nederlands woordenboek met meer dan 400.000 woorden.',
+  alternates: { canonical: '/over' },
 };
 
 export default function AboutPage() {

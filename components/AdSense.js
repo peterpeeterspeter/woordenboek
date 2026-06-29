@@ -1,15 +1,33 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
 const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-4890613119082560';
+const CONSENT_KEY = 'wb_cookie_consent';
 
 /**
- * Google AdSense – loads the pagead script.
- * Auto ads will be enabled site-wide once the script is verified in AdSense console.
+ * Google AdSense — load only after cookie consent to avoid duplicate/competing consent UI.
  */
 export function AdSenseScript() {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem(CONSENT_KEY) === 'granted') {
+      setEnabled(true);
+      return;
+    }
+
+    function onGranted() {
+      setEnabled(true);
+    }
+
+    window.addEventListener('cookie-consent-granted', onGranted);
+    return () => window.removeEventListener('cookie-consent-granted', onGranted);
+  }, []);
+
+  if (!enabled) return null;
+
   return (
     <Script
       async

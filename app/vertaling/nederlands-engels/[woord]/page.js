@@ -75,11 +75,11 @@ export default function VertalingPage({ params }) {
     description: enWords.length
       ? `${displayWord} in het Engels: ${enWords.join(', ')}`
       : `Vertaling van ${displayWord}`,
-    url: `https://woordenboek.org/vertaling/nederlands-engels/${encodeURIComponent(displayWord)}`,
+    url: `https://www.woordenboek.org/vertaling/nederlands-engels/${encodeURIComponent(displayWord)}`,
     isPartOf: {
       '@type': 'WebSite',
       name: 'Woordenboek.org',
-      url: 'https://woordenboek.org',
+      url: 'https://www.woordenboek.org',
     },
     inLanguage: 'nl',
   };
@@ -88,9 +88,9 @@ export default function VertalingPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Start', item: 'https://woordenboek.org' },
-      { '@type': 'ListItem', position: 2, name: letter, item: `https://woordenboek.org/letter/${letter.toLowerCase()}` },
-      { '@type': 'ListItem', position: 3, name: displayWord, item: `https://woordenboek.org/betekenis/${encodeURIComponent(displayWord)}` },
+      { '@type': 'ListItem', position: 1, name: 'Start', item: 'https://www.woordenboek.org' },
+      { '@type': 'ListItem', position: 2, name: letter, item: `https://www.woordenboek.org/letter/${letter.toLowerCase()}` },
+      { '@type': 'ListItem', position: 3, name: displayWord, item: `https://www.woordenboek.org/betekenis/${encodeURIComponent(displayWord)}` },
       { '@type': 'ListItem', position: 4, name: 'Vertaling' },
     ],
   };

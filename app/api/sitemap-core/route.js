@@ -45,25 +45,14 @@ export async function GET() {
   </url>`,
   ];
 
-  // Letter browse pages (with pagination — these are the internal linking hubs)
-  // Each /letter/X page links to 500 words, paginated to ?p=2, ?p=3, etc.
+  // Letter browse pages. Paginated ?p=2+ pages are noindex,follow and omitted from the sitemap.
   for (const letter of LETTERS) {
-    // Main letter page
     urls.push(`  <url>
     <loc>${base}/letter/${letter}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>`);
-    // Paginated pages (p=2 through p=8 covers most letters)
-    for (let p = 2; p <= 8; p++) {
-      urls.push(`  <url>
-    <loc>${base}/letter/${letter}?p=${p}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-    }
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
