@@ -68,6 +68,16 @@ export default function SearchBox({ isHero = false }) {
     router.push(`/betekenis/${encodeURIComponent(word)}`);
   }
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (highlighted >= 0 && results[highlighted]) {
+      go(results[highlighted]);
+    } else if (query.trim()) {
+      setOpen(false);
+      router.push(`/zoek/${encodeURIComponent(query.trim())}`);
+    }
+  }
+
   function handleKeyDown(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -105,18 +115,20 @@ export default function SearchBox({ isHero = false }) {
   const dropCls = isHero ? 'hero-search-results search-results-dropdown' : 'search-results-dropdown';
 
   return (
-    <div className={cls} ref={wrapRef} style={isHero ? undefined : { position: 'relative' }}>
+    <form className={cls} ref={wrapRef} style={isHero ? undefined : { position: 'relative' }} onSubmit={handleSubmit} role="search">
       {isHero && (
-        <svg className="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <svg className="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.3-4.3" />
         </svg>
       )}
+      <label className="sr-only" htmlFor={isHero ? 'hero-word-search' : 'word-search'}>Zoek een woord</label>
       <input
+        id={isHero ? 'hero-word-search' : 'word-search'}
         ref={inputRef}
         type="search"
         className={inputCls}
-        placeholder="Typ een woord om te zoeken..."
+        placeholder="Typ een woord om te zoeken"
         autoComplete="off"
         spellCheck="false"
         value={query}
@@ -124,19 +136,22 @@ export default function SearchBox({ isHero = false }) {
         onKeyDown={handleKeyDown}
         onFocus={() => results.length > 0 && setOpen(true)}
       />
+      {isHero && <button type="submit" className="hero-search-submit">Zoek</button>}
       {open && (
-        <div className={`${dropCls} active`}>
+        <div className={`${dropCls} active`} role="listbox">
           {results.map((w, i) => (
             <div
               key={w}
               className={`search-result-item${i === highlighted ? ' highlighted' : ''}`}
               onMouseDown={(e) => { e.preventDefault(); go(w); }}
+              role="option"
+              aria-selected={i === highlighted}
             >
               {highlight(w, query)}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </form>
   );
 }
