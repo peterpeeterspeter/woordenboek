@@ -1,5 +1,6 @@
 import './base.css';
 import './style.css';
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { GoogleAnalytics, AnalyticsPageView } from '../components/Analytics';
 import { AdSenseScript } from '../components/AdSense';
@@ -9,8 +10,8 @@ import HeaderSearch from '../components/HeaderSearch';
 export const metadata = {
   metadataBase: new URL('https://www.woordenboek.org'),
   title: {
-    default: 'Woordenboek.org — Gratis Nederlands Woordenboek',
-    template: '%s — Woordenboek.org',
+    default: 'Woordenboek.org - Gratis Nederlands Woordenboek',
+    template: '%s - Woordenboek.org',
   },
   description:
     'Betekenis, synoniemen, vertalingen en uitspraak van 400.000+ Nederlandse woorden. Snel, gratis en zonder registratie. Blader of zoek direct.',
@@ -35,18 +36,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
-        {/* Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-
         {/* JSON-LD Website */}
         <script
           type="application/ld+json"
@@ -56,7 +45,7 @@ export default function RootLayout({ children }) {
               '@type': 'WebSite',
               name: 'Woordenboek.org',
               url: 'https://www.woordenboek.org',
-              description: 'Gratis online Nederlands woordenboek met 400.000+ woorden — betekenis, synoniemen, vertalingen',
+              description: 'Gratis online Nederlands woordenboek met 400.000+ woorden: betekenis, synoniemen, vertalingen',
               inLanguage: 'nl',
               potentialAction: {
                 '@type': 'SearchAction',
@@ -90,11 +79,11 @@ function Header() {
   return (
     <header className="site-header">
       <div className="site-container header-inner">
-        <a href="/" className="site-logo" aria-label="Woordenboek.org — Startpagina">
+        <Link href="/" className="site-logo" aria-label="Woordenboek.org startpagina">
           <span className="logo-text">
             woorden<span>boek</span>
           </span>
-        </a>
+        </Link>
 
         <HeaderSearch />
       </div>
@@ -107,41 +96,45 @@ function Footer() {
     <footer className="site-footer">
       <div className="site-container">
         <div className="footer-inner">
+          <div className="footer-brand">
+            <Link href="/" className="footer-logo">Woordenboek.org</Link>
+            <p>Een snel Nederlands woordenboek met vaste pagina's voor betekenis, synoniem en vertaling.</p>
+          </div>
           <div className="footer-col">
-            <h4>Woordenboek.org</h4>
+            <h4>Woordenboek</h4>
             <ul>
-              <li><a href="/">Startpagina</a></li>
-              <li><a href="/over">Over dit woordenboek</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li><Link href="/">Startpagina</Link></li>
+              <li><Link href="/over">Over dit woordenboek</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Blader op letter</h4>
             <ul>
-              <li><a href="/letter/a">A — F</a></li>
-              <li><a href="/letter/g">G — L</a></li>
-              <li><a href="/letter/m">M — R</a></li>
-              <li><a href="/letter/s">S — Z</a></li>
+              <li><Link href="/letter/a">A - F</Link></li>
+              <li><Link href="/letter/g">G - L</Link></li>
+              <li><Link href="/letter/m">M - R</Link></li>
+              <li><Link href="/letter/s">S - Z</Link></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Juridisch</h4>
             <ul>
-              <li><a href="/privacy">Privacybeleid</a></li>
-              <li><a href="/terms">Algemene voorwaarden</a></li>
-              <li><a href="/cookies">Cookiebeleid</a></li>
+              <li><Link href="/privacy">Privacybeleid</Link></li>
+              <li><Link href="/terms">Algemene voorwaarden</Link></li>
+              <li><Link href="/cookies">Cookiebeleid</Link></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Bron</h4>
             <ul>
-              <li><a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer">OpenTaal Woordenlijst</a></li>
+              <li><a href="https://github.com/OpenTaal/opentaal-wordlist" target="_blank" rel="noopener noreferrer">OpenTaal</a></li>
               <li><a href="https://nl.wiktionary.org/" target="_blank" rel="noopener noreferrer">WikiWoordenboek</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Woordenboek.org — OpenTaal (BSD/CC-BY) &amp; WikiWoordenboek (CC-BY-SA)</span>
+          <span>© 2026 Woordenboek.org. OpenTaal (BSD/CC-BY) en WikiWoordenboek (CC-BY-SA).</span>
         </div>
       </div>
     </footer>

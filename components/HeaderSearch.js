@@ -97,11 +97,13 @@ export default function HeaderSearch() {
 
   return (
     <div className="header-search" ref={wrapRef}>
-      <svg className="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <svg className="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.3-4.3" />
       </svg>
+      <label className="sr-only" htmlFor="header-word-search">Zoek een woord</label>
       <input
+        id="header-word-search"
         ref={inputRef}
         type="search"
         className="header-search-input"
