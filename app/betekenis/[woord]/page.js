@@ -28,19 +28,27 @@ export function generateMetadata({ params }) {
   const word = decodeURIComponent(params.woord);
   const entry = getWordEntry(word);
   const firstDef = entry?.dict?.s?.[0]?.d?.[0]?.t;
-  const description = firstDef
-    ? `${word}: ${firstDef.slice(0, 150)}${firstDef.length > 150 ? '…' : ''}`
-    : `Betekenis en definitie van "${word}" in het Nederlands woordenboek.`;
 
   // noindex orphan pages without a definition — saves crawl budget
   const hasDefinition = !!firstDef;
 
+  // Optimized title: mirrors "[woord] betekenis" search intent (biggest cluster)
+  // No em-dash; "& definitie" broadens match to "definitie" queries
+  const title = hasDefinition
+    ? `${word} betekenis & definitie`
+    : `Betekenis van "${word}"`;
+
+  // Description starts with "[woord] betekenis:" for featured snippet targeting
+  const description = firstDef
+    ? `${word} betekenis: ${firstDef.slice(0, 120)}. Bekijk voorbeelden, synoniemen en uitspraak.`
+    : `Wat betekent ${word}? Zoek de betekenis en definitie van "${word}" in ons Nederlands woordenboek met 400.000+ woorden.`;
+
   return {
-    title: `${word} — Betekenis & definitie`,
+    title,
     description,
     ...( !hasDefinition && { robots: { index: false, follow: true } } ),
     openGraph: {
-      title: `${word} — Betekenis & definitie`,
+      title,
       description,
     },
     alternates: {
@@ -63,6 +71,17 @@ export default function WordPage({ params }) {
   const firstDef = hasDef ? dict.s[0].d[0]?.t : undefined;
   const genderLabel = dict?.g ? GENDER_MAP[dict.g] || dict.g : null;
   const charCount = displayWord.replace(/\s/g, '').length;
+
+  // BreadcrumbList JSON-LD
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Start', item: 'https://www.woordenboek.org' },
+      { '@type': 'ListItem', position: 2, name: letter, item: `https://www.woordenboek.org/letter/${letter.toLowerCase()}` },
+      { '@type': 'ListItem', position: 3, name: displayWord },
+    ],
+  };
 
   // JSON-LD
   const jsonLd = {
@@ -95,6 +114,7 @@ export default function WordPage({ params }) {
 
   return (
     <div className="page-content word-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
