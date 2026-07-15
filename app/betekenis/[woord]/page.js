@@ -29,18 +29,27 @@ export function generateMetadata({ params }) {
   const entry = getWordEntry(word);
   const firstDef = entry?.dict?.s?.[0]?.d?.[0]?.t;
 
+  // Count total definitions across all senses
+  const defCount = entry?.dict?.s?.reduce((acc, pos) => acc + (pos?.d?.length || 0), 0) || 0;
+
   // noindex orphan pages without a definition — saves crawl budget
   const hasDefinition = !!firstDef;
 
-  // Optimized title: mirrors "[woord] betekenis" search intent (biggest cluster)
-  // No em-dash; "& definitie" broadens match to "definitie" queries
+  // Count synonyms for title richness
+  const synCount = entry?.synonyms?.length || 0;
+
+  // Optimized title: "[woord] betekenis" + value-add qualifiers
+  // Adding definition count and synonym mention increases CTR by showing depth
   const title = hasDefinition
-    ? `${word} betekenis & definitie`
+    ? defCount > 1
+      ? `${word} betekenis (${defCount} definities) + synoniemen`
+      : `${word} betekenis & definitie + synoniemen`
     : `Betekenis van "${word}"`;
 
-  // Description starts with "[woord] betekenis:" for featured snippet targeting
+  // Description: lead with the actual definition (featured snippet bait),
+  // then list what else the page offers (voorbeelden, synoniemen, uitspraak)
   const description = firstDef
-    ? `${word} betekenis: ${firstDef.slice(0, 120)}. Bekijk voorbeelden, synoniemen en uitspraak.`
+    ? `${word} betekenis: ${firstDef.slice(0, 110)}. Bekijk ${defCount > 1 ? `${defCount} definities, ` : ''}voorbeelden${synCount > 0 ? `, ${synCount} synoniemen` : ''} en uitspraak.`
     : `Wat betekent ${word}? Zoek de betekenis en definitie van "${word}" in ons Nederlands woordenboek met 400.000+ woorden.`;
 
   return {
@@ -71,6 +80,7 @@ export default function WordPage({ params }) {
   const firstDef = hasDef ? dict.s[0].d[0]?.t : undefined;
   const genderLabel = dict?.g ? GENDER_MAP[dict.g] || dict.g : null;
   const charCount = displayWord.replace(/\s/g, '').length;
+  const defCount = dict?.s?.reduce((acc, pos) => acc + (pos?.d?.length || 0), 0) || 0;
 
   // BreadcrumbList JSON-LD
   const breadcrumbLd = {
@@ -98,18 +108,62 @@ export default function WordPage({ params }) {
     url: `https://www.woordenboek.org/betekenis/${encodeURIComponent(displayWord)}`,
   };
 
-  // FAQ schema for pages with definitions — targets featured snippets
+  // FAQ schema for pages with definitions — expanded for more rich result coverage
+  // Each question targets a real search intent pattern from GSC data
+  const allExamples = [];
+  if (hasDef) {
+    dict.s.forEach((posGroup) => {
+      posGroup.d.forEach((d) => {
+        if (d.x?.length > 0) allExamples.push(...d.x);
+      });
+    });
+  }
+
   const faqLd = hasDef ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [{
-      '@type': 'Question',
-      name: `Wat is de betekenis van ${displayWord}?`,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: `${displayWord} betekent: ${firstDef}`,
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: `Wat is de betekenis van ${displayWord}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `${displayWord} betekent: ${firstDef}`,
+        },
       },
-    }],
+      ...(defCount > 1 ? [{
+        '@type': 'Question',
+        name: `Hoeveel betekenissen heeft ${displayWord}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `${displayWord} heeft ${defCount} ${defCount === 1 ? 'betekenis' : 'verschillende betekenissen'} in het Nederlands.`,
+        },
+      }] : []),
+      ...(genderLabel ? [{
+        '@type': 'Question',
+        name: `Welk woordgeslacht heeft ${displayWord}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `${displayWord} is een ${genderLabel.toLowerCase()}.`,
+        },
+      }] : []),
+      ...(synonyms?.length > 0 ? [{
+        '@type': 'Question',
+        name: `Wat zijn synoniemen van ${displayWord}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Synoniemen van ${displayWord} zijn: ${synonyms.slice(0, 5).join(', ')}.`,
+        },
+      }] : []),
+      ...(allExamples.length > 0 ? [{
+        '@type': 'Question',
+        name: `Hoe gebruik je ${displayWord} in een zin?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Voorbeeld: "${allExamples[0]}"`,
+        },
+      }] : []),
+    ],
   } : null;
 
   return (
@@ -212,6 +266,60 @@ export default function WordPage({ params }) {
             </span>
           </div>
         </div>
+      )}
+
+      {/* Visible FAQ section — must match JSON-LD for Google compliance */}
+      {hasDef && (
+        <section className="dict-faq-section">
+          <h2 className="dict-card-title">Veelgestelde vragen over {displayWord}</h2>
+          <div className="faq-list">
+            <div className="faq-item">
+              <h3 className="faq-question">Wat is de betekenis van {displayWord}?</h3>
+              <p className="faq-answer">
+                <strong>{displayWord}</strong> betekent: {firstDef}
+              </p>
+            </div>
+            {defCount > 1 && (
+              <div className="faq-item">
+                <h3 className="faq-question">Hoeveel betekenissen heeft {displayWord}?</h3>
+                <p className="faq-answer">
+                  {displayWord} heeft {defCount} verschillende betekenissen in het Nederlands. Zie hierboven voor alle definities.
+                </p>
+              </div>
+            )}
+            {genderLabel && (
+              <div className="faq-item">
+                <h3 className="faq-question">Welk woordgeslacht heeft {displayWord}?</h3>
+                <p className="faq-answer">
+                  {displayWord} is een {genderLabel.toLowerCase()}.
+                </p>
+              </div>
+            )}
+            {synonyms?.length > 0 && (
+              <div className="faq-item">
+                <h3 className="faq-question">Wat zijn synoniemen van {displayWord}?</h3>
+                <p className="faq-answer">
+                  Synoniemen van {displayWord} zijn:{' '}
+                  {synonyms.slice(0, 5).map((w, i) => (
+                    <span key={w}>
+                      <Link href={`/betekenis/${encodeURIComponent(w)}`} style={{ color: 'var(--color-primary)' }}>{w}</Link>
+                      {i < Math.min(synonyms.length, 5) - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+                  .
+                </p>
+              </div>
+            )}
+            {allExamples.length > 0 && (
+              <div className="faq-item">
+                <h3 className="faq-question">Hoe gebruik je {displayWord} in een zin?</h3>
+                <p className="faq-answer">
+                  Voorbeeld: &ldquo;{allExamples[0]}&rdquo;
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
       {/* Etymology */}
