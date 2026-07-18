@@ -74,7 +74,7 @@ export default function WordPage({ params }) {
 
   if (!entry) return notFound();
 
-  const { dict, found, prevWord, nextWord, synonyms, antonyms, related, letter } = entry;
+  const { dict, found, prevWord, nextWord, synonyms, antonyms, related, letter, unique } = entry;
   const displayWord = entry.word;
   const hasDef = dict?.s?.length > 0;
   const firstDef = hasDef ? dict.s[0].d[0]?.t : undefined;
@@ -266,6 +266,50 @@ export default function WordPage({ params }) {
             </span>
           </div>
         </div>
+      )}
+
+      {/* Unique AI-generated content — makes each page distinct from Wiktionary */}
+      {unique && (
+        <section className="dict-unique-content">
+          {unique.beschrijving && (
+            <>
+              <h2 className="dict-card-title">Betekenis en uitleg van {displayWord}</h2>
+              <p className="dict-unique-beschrijving">{unique.beschrijving}</p>
+            </>
+          )}
+          {unique.uitleg && (
+            <p className="dict-unique-uitleg">{unique.uitleg}</p>
+          )}
+          {unique.voorbeelden?.length > 0 && (
+            <div className="dict-unique-voorbeelden">
+              <h3 className="dict-section-title">Voorbeelden</h3>
+              <ul className="dict-example-list">
+                {unique.voorbeelden.map((ex, i) => (
+                  <li key={i} className="dict-example-item">{ex}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {unique.etymologie && (
+            <div className="dict-unique-etymologie">
+              <h3 className="dict-section-title">Woordoorsprong</h3>
+              <p>{unique.etymologie}</p>
+            </div>
+          )}
+          {unique.spreekwoorden?.length > 0 && (
+            <div className="dict-unique-spreekwoorden">
+              <h3 className="dict-section-title">Uitdrukkingen met {displayWord}</h3>
+              <ul className="dict-expr-list">
+                {unique.spreekwoorden.map((sp, i) => (
+                  <li key={i} className="dict-expr-item">
+                    <span className="dict-expr-text">{sp.uitdrukking}</span>
+                    {sp.betekenis && <span className="dict-expr-meaning"> — {sp.betekenis}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
       )}
 
       {/* Visible FAQ section — must match JSON-LD for Google compliance */}
