@@ -98,9 +98,11 @@ def save_results(results):
             json.dump(existing, f, ensure_ascii=False, indent=1)
 
 def main():
-    # Load top 10K words
-    with open('/tmp/top10k_words.json', 'r') as f:
+    # Load word list (top10k or next10k)
+    word_file = '/tmp/next10k_words.json' if os.path.exists('/tmp/next10k_words.json') else '/tmp/top10k_words.json'
+    with open(word_file, 'r') as f:
         all_words = json.load(f)
+    print(f"Using word list: {word_file} ({len(all_words)} words)")
 
     # Load existing progress
     existing = load_existing()
