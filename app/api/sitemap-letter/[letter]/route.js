@@ -1,5 +1,15 @@
 import { getDefinedWordsForLetter, getDictData, LETTERS } from '../../../../lib/dictionary';
 
+// The dictionary only changes when a new deployment ships updated data files.
+// Keep this generated sitemap cached until that deployment instead of rebuilding it daily.
+export const revalidate = false;
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return LETTERS.map((letter) => ({ letter }));
+}
+
 export async function GET(request, { params }) {
   const l = params.letter?.toLowerCase();
   if (!l || !LETTERS.includes(l)) {
@@ -9,7 +19,6 @@ export async function GET(request, { params }) {
   const words = getDefinedWordsForLetter(l);
   const dictData = getDictData(l);
   const base = 'https://www.woordenboek.org';
-  const today = new Date().toISOString().split('T')[0];
 
   const urls = words
     .flatMap((w) => {
@@ -18,7 +27,6 @@ export async function GET(request, { params }) {
         // Always include betekenis page
         `  <url>
     <loc>${base}/betekenis/${encodeURIComponent(w)}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`,
@@ -29,7 +37,6 @@ export async function GET(request, { params }) {
         pages.push(
           `  <url>
     <loc>${base}/synoniem/${encodeURIComponent(w)}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`
@@ -41,7 +48,6 @@ export async function GET(request, { params }) {
         pages.push(
           `  <url>
     <loc>${base}/vertaling/nederlands-engels/${encodeURIComponent(w)}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`
@@ -60,7 +66,7 @@ ${urls}
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml',
-      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+      'Cache-Control': 'public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400',
     },
   });
 }

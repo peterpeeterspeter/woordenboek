@@ -1,21 +1,21 @@
 import { LETTERS } from '../../../lib/dictionary';
 
+// Sitemap contents only change when a deployment updates the dictionary.
+export const revalidate = false;
+
 export async function GET() {
   const base = 'https://www.woordenboek.org';
-  const today = new Date().toISOString().split('T')[0];
 
   // Letter sub-sitemaps (word pages)
   const letterEntries = LETTERS.map(
     (l) => `  <sitemap>
     <loc>${base}/sitemap-${l}.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`
   ).join('\n');
 
   // Core pages sitemap (browse pages, homepage, static pages)
   const coreEntry = `  <sitemap>
     <loc>${base}/sitemap-core.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`;
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -27,7 +27,7 @@ ${letterEntries}
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml',
-      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+      'Cache-Control': 'public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400',
     },
   });
 }

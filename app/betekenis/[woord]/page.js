@@ -5,8 +5,8 @@ import { AdUnit } from '../../../components/AdSense';
 
 /* ---------- ISR config ---------- */
 
-/** Revalidate every 7 days — definitions don't change often */
-export const revalidate = 604800;
+/** Render once on demand and cache until a deployment updates the dictionary. */
+export const revalidate = false;
 
 /**
  * dynamicParams = true (default) means words NOT in generateStaticParams
@@ -16,7 +16,7 @@ export const dynamicParams = true;
 
 /**
  * Pre-render only the ~200 popular words at build time.
- * All other 162K words are generated on first request.
+ * All other words are generated on first request.
  */
 export function generateStaticParams() {
   return POPULAR_WORDS.map((w) => ({ woord: w }));

@@ -4,7 +4,8 @@ import { getWordEntry, getWordList, GENDER_MAP, LANG_NAMES, POPULAR_WORDS } from
 
 /* ---------- ISR config ---------- */
 
-export const revalidate = 604800; // 7 days
+// Render once on demand and cache until a deployment updates the dictionary.
+export const revalidate = false;
 
 export const dynamicParams = true;
 
