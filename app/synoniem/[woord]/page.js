@@ -4,7 +4,8 @@ import { getWordEntry, getWordList, getDictData, GENDER_MAP, POPULAR_WORDS } fro
 
 /* ---------- ISR config ---------- */
 
-export const revalidate = 604800; // 7 days — definitions rarely change
+// Render once on demand and cache until a deployment updates the dictionary.
+export const revalidate = false;
 
 export const dynamicParams = true;
 
@@ -27,18 +28,23 @@ export function generateMetadata({ params }) {
   if (!entry || !entry.synonyms || entry.synonyms.length === 0) {
     return {
       title: `Synoniemen van "${word}"`,
-      description: `Zoek synoniemen van "${word}" in het Nederlands woordenboek.`,
+      description: `Welke synoniemen heeft ${word}? Bekijk synoniemen, antoniemen en verwante woorden in ons Nederlands woordenboek.`,
+      alternates: {
+        canonical: `/synoniem/${encodeURIComponent(word)}`,
+      },
     };
   }
 
+  const count = entry.synonyms.length;
   const synList = entry.synonyms.slice(0, 6).join(', ');
-  const description = `Synoniemen van ${word}: ${synList}${entry.synonyms.length > 6 ? ' en meer' : ''}. Bekijk alle synoniemen, antoniemen en verwante woorden in het Nederlands woordenboek.`;
+  const description = `Synoniemen van ${word} (${count}): ${synList}${count > 6 ? ' en meer' : ''}. Bekijk alle synoniemen en antoniemen in het Nederlands woordenboek.`;
+  const title = `Synoniemen van ${word} (${count})`;
 
   return {
-    title: `Synoniemen van ${word}`,
+    title,
     description,
     openGraph: {
-      title: `Synoniemen van ${word}`,
+      title,
       description,
     },
     alternates: {
@@ -93,10 +99,25 @@ export default function SynoniemPage({ params }) {
     ],
   };
 
+  // FAQ schema — targets "[woord] synoniem" featured snippets
+  const faqLd = hasSynonyms ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [{
+      '@type': 'Question',
+      name: `Wat zijn goede synoniemen van ${displayWord}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Synoniemen van ${displayWord} zijn: ${synonyms.slice(0, 8).join(', ')}${synonyms.length > 8 ? ` en nog ${synonyms.length - 8} meer` : ''}.`,
+      },
+    }],
+  } : null;
+
   return (
     <div className="page-content word-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <nav className="breadcrumb">
         <Link href="/">Start</Link>
@@ -191,6 +212,17 @@ export default function SynoniemPage({ params }) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* FAQ section — visible text matching JSON-LD (Google requirement) */}
+      {hasSynonyms && (
+        <section className="dict-snippet-answer" style={{ marginTop: 'var(--space-5)' }}>
+          <h2 className="dict-card-title">Veelgestelde vragen</h2>
+          <h3 className="dict-section-title" style={{ marginTop: 'var(--space-3)' }}>Wat zijn goede synoniemen van {displayWord}?</h3>
+          <p style={{ color: 'var(--color-text)' }}>
+            Synoniemen van {displayWord} zijn: {synonyms.slice(0, 8).join(', ')}{synonyms.length > 8 && ` en nog ${synonyms.length - 8} meer`}.
+          </p>
+        </section>
       )}
 
       {/* Cross-link to betekenis page */}

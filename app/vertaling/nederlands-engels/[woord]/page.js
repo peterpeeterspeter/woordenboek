@@ -4,7 +4,8 @@ import { getWordEntry, getWordList, GENDER_MAP, LANG_NAMES, POPULAR_WORDS } from
 
 /* ---------- ISR config ---------- */
 
-export const revalidate = 604800; // 7 days
+// Render once on demand and cache until a deployment updates the dictionary.
+export const revalidate = false;
 
 export const dynamicParams = true;
 
@@ -26,19 +27,24 @@ export function generateMetadata({ params }) {
 
   if (!enWords?.length) {
     return {
-      title: `Vertaling ${word}`,
-      description: `Vertaling van "${word}" in het Nederlands woordenboek.`,
+      title: `"${word}" in het Engels`,
+      description: `Hoe zeg je ${word} in het Engels? Bekijk de vertaling en vertalingen in andere talen in ons Nederlands woordenboek.`,
+      alternates: {
+        canonical: `/vertaling/nederlands-engels/${encodeURIComponent(word)}`,
+      },
     };
   }
 
   const enStr = enWords.join(', ');
-  const description = `${word} in het Engels: ${enStr}. Bekijk vertalingen in 14 talen, synoniemen en voorbeelden.`;
+  // Title mirrors "[woord] engels" search intent
+  const title = `${word} in het Engels: ${enStr}`;
+  const description = `${word} in het Engels: ${enStr}. Bekijk vertalingen in 14 talen, synoniemen en voorbeelden op Woordenboek.org.`;
 
   return {
-    title: `Nederlands → Engels: ${word} (${enStr})`,
+    title,
     description,
     openGraph: {
-      title: `Vertaling ${word} — Nederlands-Engels`,
+      title,
       description,
     },
     alternates: {
@@ -95,10 +101,25 @@ export default function VertalingPage({ params }) {
     ],
   };
 
+  // FAQ schema — targets "[woord] engels" featured snippets
+  const faqLd = enWords.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [{
+      '@type': 'Question',
+      name: `Hoe zeg je ${displayWord} in het Engels?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `${displayWord} in het Engels zeg je: ${enWords.join(', ')}.`,
+      },
+    }],
+  } : null;
+
   return (
     <div className="page-content word-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <nav className="breadcrumb">
         <Link href="/">Start</Link>
@@ -164,6 +185,17 @@ export default function VertalingPage({ params }) {
               </Link>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* FAQ section — visible text matching JSON-LD (Google requirement) */}
+      {enWords.length > 0 && (
+        <section className="dict-snippet-answer" style={{ marginTop: 'var(--space-5)' }}>
+          <h2 className="dict-card-title">Veelgestelde vragen</h2>
+          <h3 className="dict-section-title" style={{ marginTop: 'var(--space-3)' }}>Hoe zeg je {displayWord} in het Engels?</h3>
+          <p style={{ color: 'var(--color-text)' }}>
+            {displayWord} in het Engels zeg je: <strong>{enWords.join(', ')}</strong>.
+          </p>
         </section>
       )}
 

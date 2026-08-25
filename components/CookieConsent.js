@@ -6,8 +6,8 @@ const CONSENT_KEY = 'wb_cookie_consent';
 
 /**
  * GDPR cookie consent banner.
- * Dispatches 'cookie-consent-granted' on window when accepted,
- * which GA4 and AdSense listen for to activate tracking.
+ * Uses Google Consent Mode v2 — tracking works in cookieless mode
+ * before consent, then upgrades when accepted.
  */
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -15,17 +15,13 @@ export function CookieConsent() {
   useEffect(() => {
     const stored = localStorage.getItem(CONSENT_KEY);
     if (stored === 'granted') {
-      // Already accepted — let the consent update run so GA/AdSense activate.
       window.dispatchEvent(new Event('cookie-consent-granted'));
     } else if (!stored) {
-      // Show banner after short delay to avoid layout shift. Auto-dismiss so
-      // an ignored banner doesn't leave the visitor unmeasured forever: with
-      // Consent Mode default-denied they're still counted via cookieless
-      // pings, and the banner returns on their next visit.
-      const t = setTimeout(() => setVisible(true), 1000);
-      return () => clearTimeout(t);
+      // Show banner immediately — no delay (the old 1s delay caused
+      // users to miss it when BAILOUT_TO_CLIENT_SIDE_RENDERING prevented
+      // proper hydration)
+      setVisible(true);
     }
-    // If 'denied', do nothing — no banner, no tracking
   }, []);
 
   function handleAccept() {

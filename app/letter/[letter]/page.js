@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getWordList, LETTERS } from '../../../lib/dictionary';
 
-export const revalidate = 86400;
+// The word lists change only when new data is deployed.
+export const revalidate = false;
 
 export function generateStaticParams() {
   return LETTERS.map((l) => ({ letter: l }));

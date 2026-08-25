@@ -2064,3 +2064,102 @@ main {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* FAQ Section — visible Q&A matching JSON-LD schema */
+.dict-faq-section {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.faq-item {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.faq-question {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.faq-answer {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ===== Unique AI content section ===== */
+.dict-unique-content {
+  margin: var(--space-6) 0;
+  padding: var(--space-5);
+  background: var(--color-bg-elevated, #f8f9fa);
+  border-radius: 12px;
+  border: 1px solid var(--color-border-light);
+}
+
+.dict-unique-beschrijving {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+.dict-unique-uitleg {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.dict-unique-voorbeelden,
+.dict-unique-etymologie,
+.dict-unique-spreekwoorden {
+  margin-top: var(--space-4);
+}
+
+.dict-unique-content .dict-section-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dict-unique-content .dict-example-list {
+  list-style: disc;
+  padding-left: var(--space-5);
+}
+
+.dict-unique-content .dict-example-item {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: var(--space-1);
+}
+
+.dict-unique-content p {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+[data-theme="dark"] .dict-unique-content {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
