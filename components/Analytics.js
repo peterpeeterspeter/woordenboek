@@ -10,15 +10,14 @@ const CONSENT_KEY = 'wb_cookie_consent';
 /**
  * Google Analytics 4 with Google Consent Mode v2.
  *
- * Key difference from before: GA4 loads and sends cookieless pings
- * immediately (analytics_storage: 'denied'). This means page views are
- * counted even without consent — just without cookies. When the user
- * accepts, consent upgrades to full cookie-based tracking.
+ * GA4 loads and sends cookieless pings immediately (analytics_storage:
+ * 'denied'). Page views are counted even without consent — just without
+ * cookies. When the user accepts, consent upgrades to full cookie-based
+ * tracking.
  *
- * This fixes the 85% tracking drop that happened because the old code
- * used send_page_view: false, which blocked ALL tracking until the
- * consent banner (which was broken by BAILOUT_TO_CLIENT_SIDE_RENDERING)
- * was clicked.
+ * Single page_view owner (see AnalyticsPageView below): the gtag config uses
+ * send_page_view: false so the automatic config page view is suppressed, and
+ * AnalyticsPageView fires exactly one page_view per load / navigation.
  */
 export function GoogleAnalytics() {
   if (!GA_ID) return null;
@@ -46,12 +45,16 @@ export function GoogleAnalytics() {
             'security_storage': 'granted'
           });
 
-          // Config WITHOUT send_page_view: false — let GA4 fire cookieless page views
+          // send_page_view: false — AnalyticsPageView owns all page_view events.
+          // Without this, the automatic config page view would double-count every
+          // load alongside the manual one from AnalyticsPageView.
           gtag('config', '${GA_ID}', {
-            page_path: window.location.pathname + window.location.search
+            page_path: window.location.pathname + window.location.search,
+            send_page_view: false
           });
 
-          // Upgrade to full tracking when consent is granted
+          // Upgrade to full tracking when consent is granted. Deliberately no
+          // page_view here — AnalyticsPageView already covers this navigation.
           window.addEventListener('cookie-consent-granted', function() {
             gtag('consent', 'update', {
               'analytics_storage': 'granted',
@@ -68,8 +71,10 @@ export function GoogleAnalytics() {
 
 /**
  * Track page views on App Router client-side navigations.
- * Note: no longer gated on consent — Consent Mode handles this.
- * Removed useSearchParams() to fix BAILOUT_TO_CLIENT_SIDE_RENDERING.
+ * Sole page_view sender: one event on mount (initial load) and one per
+ * client-side navigation. No useSearchParams (fixes
+ * BAILOUT_TO_CLIENT_SIDE_RENDERING); window.location carries the query string.
+ * Not gated on consent — Consent Mode handles cookieless measurement.
  */
 export function AnalyticsPageView() {
   const pathname = usePathname();
