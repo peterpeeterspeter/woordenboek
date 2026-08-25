@@ -15,10 +15,13 @@ export function CookieConsent() {
   useEffect(() => {
     const stored = localStorage.getItem(CONSENT_KEY);
     if (stored === 'granted') {
-      // Already accepted — fire consent event
+      // Already accepted — let the consent update run so GA/AdSense activate.
       window.dispatchEvent(new Event('cookie-consent-granted'));
     } else if (!stored) {
-      // Show banner after short delay to avoid layout shift
+      // Show banner after short delay to avoid layout shift. Auto-dismiss so
+      // an ignored banner doesn't leave the visitor unmeasured forever: with
+      // Consent Mode default-denied they're still counted via cookieless
+      // pings, and the banner returns on their next visit.
       const t = setTimeout(() => setVisible(true), 1000);
       return () => clearTimeout(t);
     }
